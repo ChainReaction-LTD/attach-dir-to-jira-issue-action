@@ -1,0 +1,56 @@
+---
+name: attach-dir-to-jira-issue
+author: Yakir Magriso
+description: Attach a directory (as a ZIP file) to a Jira issue
+inputs:
+  jira-base-url:
+    description: Jira base URL
+    required: true
+  jira-user-email:
+    description: Jira user email
+    required: true
+  jira-api-token:
+    description: Jira API token
+    required: true
+  jira-issue-id:
+    description: Jira issue ID
+    required: true
+  attachment-path:
+    description: Path to attachment (to add to the bug)
+    required: true
+  attachment-name:
+    description: Attachment name
+    required: true
+  jira-issue-comment:
+    description: Comment to add to the Jira issue with the attachment (optional)
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Login to Jira
+      uses: atlassian/gajira-login@v2.0.0
+      if: ${{ inputs.jira-issue-comment != '' }}
+      env:
+        JIRA_BASE_URL: ${{ inputs.jira-base-url }}
+        JIRA_USER_EMAIL: ${{ inputs.jira-user-email }}
+        JIRA_API_TOKEN: ${{ inputs.jira-api-token }}
+
+    - name: Add comment for the new attachment
+      uses: atlassian/gajira-comment@v2.0.2
+      if: ${{ inputs.jira-issue-comment != '' }}
+      with:
+        issue: ${{ inputs.jira-issue-id }}
+        comment: ${{ inputs.jira-issue-comment }}
+
+    - name: Create ZIP file for attachment
+      shell: bash
+      working-directory: ${{ inputs.attachment-path }}
+      run: |
+        zip -r ../${{ inputs.attachment-name }} .
+
+    - name: Attach report and logs to the Jira issue
+      shell: bash
+      run: |
+        curl --location --request POST --user "${{ inputs.jira-user-email }}:${{ inputs.jira-api-token }}" --header "X-Atlassian-Token: no-check" --form "file=@${{ inputs.attachment-path }}/../${{ inputs.attachment-name }}" "${{ inputs.jira-base-url }}/rest/api/3/issue/${{ inputs.jira-issue-id }}/attachments"
