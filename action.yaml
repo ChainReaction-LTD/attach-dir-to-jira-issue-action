@@ -1,5 +1,5 @@
 ---
-name: attach-dir-to-jira-issue
+name: attach-dir-to-jira-issue-action
 author: Yakir Magriso
 description: Attach a directory (as a ZIP file) to a Jira issue
 inputs:
