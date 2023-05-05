@@ -30,7 +30,7 @@ runs:
   using: composite
   steps:
     - name: Login to Jira
-      uses: atlassian/gajira-login@v2.0.0
+      uses: atlassian/gajira-login@v3
       if: ${{ inputs.jira-issue-comment != '' }}
       env:
         JIRA_BASE_URL: ${{ inputs.jira-base-url }}
@@ -38,7 +38,7 @@ runs:
         JIRA_API_TOKEN: ${{ inputs.jira-api-token }}
 
     - name: Add comment for the new attachment
-      uses: atlassian/gajira-comment@v2.0.2
+      uses: atlassian/gajira-comment@v3
       if: ${{ inputs.jira-issue-comment != '' }}
       with:
         issue: ${{ inputs.jira-issue-id }}
